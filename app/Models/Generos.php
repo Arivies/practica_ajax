@@ -8,5 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Generos extends Model
 {
     use HasFactory;
-    protected $fillable=['genero'];
+    protected $fillable = ['genero'];
+
+    public function banda()
+    {
+        return $this->hasOne(Bandas::class);
+    }
 }

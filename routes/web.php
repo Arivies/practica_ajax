@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Generos\GeneroController;
-
+use App\Http\Controllers\Bandas\BandaController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,8 +15,9 @@ use App\Http\Controllers\Generos\GeneroController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('layout');
 });
 
 
 Route::resource('/generos',GeneroController::class)->names('generos');
+Route::resource('/bandas',BandaController::class)->names('bandas');
