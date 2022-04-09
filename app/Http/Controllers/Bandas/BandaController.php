@@ -7,6 +7,7 @@ use App\Models\Bandas;
 use App\Models\Generos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class BandaController extends Controller
 {
@@ -56,6 +57,7 @@ class BandaController extends Controller
                 'estatus' => 'error',
                 'mensaje' => 'Banda ya se encuentra registrado!'
             );
+            return response()->json($mensajes);
         }
         $path = 'bandas/';
         $file = $request->file('logo');
@@ -90,7 +92,9 @@ class BandaController extends Controller
      */
     public function edit(Bandas $bandas,$id)
     {
-        return response()->json($bandas::where('id', $id)->first());
+        $data['bandas']=$bandas::where('id', $id)->first();
+        $data['generos']=Generos::all();
+        return response()->json($data);
     }
 
     /**
@@ -100,8 +104,9 @@ class BandaController extends Controller
      * @param  \App\Models\Bandas  $bandas
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Bandas $bandas)
+    public function update(Request $request, Bandas $banda)
     {
+        die($banda);
         $validador = Validator::make($request->all(), [
             'nombre' => 'unique:bandas'
          ]);
@@ -116,10 +121,26 @@ class BandaController extends Controller
                  'estatus' => 'error',
                  'mensaje' => 'Banda ya se encuentra registrado!'
              );
-         }
-         $data = $bandas::where('id', $request->id)->first();
-         $resp = $request->except('_token', 'id');
-         $data->update($resp);
+        }
+
+         $resp=$request->all();
+
+         if(!empty($request->file('logo'))){
+            $path = 'bandas/';
+            $file = $request->file('logo');
+            $nombre="";
+            if(!is_null($file)){
+                $nombre = time().'_'.$file->getClientOriginalName();
+                $upload = $file->storeAs($path, $nombre, 'public');
+            }
+            $resp['logo']=$nombre;
+            Storage::delete('bandas/'.$request->logo_ant);
+        }
+
+        $data = $banda::where('id', $request->id)->first();
+        dd($request);
+        $resp = $request->except('_token', 'id');
+        $data->update($resp);
 
          /*$data=$generos::where('id',$request->id)->first();
          $data->genero=$request->genero;

@@ -74,6 +74,7 @@
                             <label for="logo" class="col-sm-2 control-label">Logo </label>
                             <div class="col-sm-10">
                                 <input type="file" class="form-control form-control-sm" id="logo" name="logo" required="" accept="image/*">
+                                <input type="hidden" class="form-control form-control-sm" id="logo_ant" name="logo_ant" >
                             </div>
                         </div>
                         <div class="row mt-2">
@@ -122,7 +123,20 @@
                         $(datos).each(function(i,v){
                             genero.append('<option value="'+v.id+'">'+v.genero+'</option>');
                         })
-                        img_previa();
+
+                        $('input[type="file"][name="logo"]').on('change', function(){
+
+                            $("#muestra_img").find('.img-fluid').remove();
+                            let muestra_img='';
+                            var reader = new FileReader();
+                            let path= $(this)[0].value;
+                                muestra_img = $("#muestra_img");
+                                reader.onload = function(e){
+                                $('<img/>',{'src':e.target.result,'class':'img-fluid','style':'max-width:100px;margin-bottom:10px;'}).appendTo(muestra_img);
+                                }
+                                muestra_img.show();
+                                reader.readAsDataURL($(this)[0].files[0]);
+                        });
 
 
 
@@ -177,16 +191,39 @@
                     dataType: 'json',
                     success: function(data) {
 
+                        let generos=data.generos;
+                        let bandas=data.bandas;
+
                         $("#addEditBandaForm").trigger("reset"); //LIMPIA EL FORMULARIO MODAL
                         $("#tituloBandaModal").html("Editar Banda"); //ESCRIBE TITULO EN EL MODAL
 
-                      //  $("#id").val(data.id); //ASIGNA VALORES EN EL FORMULARIO
-                      //  $("#genero").val(data.genero); //ASIGNA VALORES EN EL FORMULARIO
+                        $("#id").val(bandas.id); //ASIGNA VALORES EN EL FORMULARIO
+                        $("#nombre").val(bandas.nombre); //ASIGNA VALORES EN EL FORMULARIO
 
-                      //  $("#btn-guardar").val('editaGenero'); //CAMBIA EL VALOR DEL BOTON EN EL FORMULARIO MODAL
-                     //   $("#btn-guardar").html('Editar'); //CAMBIA EL TEXTO DEL BOTON EN EL FORMULARIO MODAL
+                        $("#logo_ant").val(bandas.logo); //ASIGNA VALORES EN EL FORMULARIO
 
-                     //   $("#modal-generos").modal('show'); //MUESTRA EL MODAL
+                        let genero=$("#genero");
+                            genero.find('option').remove();
+                            genero.append('<option value="0">Seleccione</option>');
+                            $(generos).each(function(i,v){
+                                genero.append('<option value="'+v.id+'">'+v.genero+'</option>');
+                            })
+                            $("#genero option:eq("+bandas.genero_id+")").prop('selected',true);
+
+                            $('input[type="file"][name="logo"]').val('');
+                            $('input[type="file"][name="logo"]').on('change', function(){
+
+                                $("#muestra_img").find('.img-fluid').remove();
+                                let path=$(this)[0].value;
+                                let img_file=$(this)[0].files[0];
+                                img_previa(path,img_file);
+                            });
+                            $("#muestra_img").html('<img src="storage/bandas/'+bandas.logo+'" class="img-fluid rounded" width="100px" height="100px" />')
+
+
+                        $("#btn-guardar").val('editaBanda'); //CAMBIA EL VALOR DEL BOTON EN EL FORMULARIO MODAL
+                        $("#btn-guardar").html('Editar'); //CAMBIA EL TEXTO DEL BOTON EN EL FORMULARIO MODAL
+                        $("#modal-bandas").modal('show'); //MUESTRA EL MODAL
                     }
                 });
             });
@@ -253,6 +290,7 @@
                 forma.append('nombre',$("#nombre").val());
                 forma.append('genero_id',$("#genero").val());
                 forma.append('logo',$("#logo")[0].files[0]);
+                forma.append('logo_ant',$("#logo_ant").val());
 
                 //RECIBER POR PARAMETRO EL METODO A UTILIZAR(POST/PUT) Y LA URL QUE INDICARA A QUE CONTROLADOR Y METODO DIRIGIRSE
                 $.ajax({
@@ -274,26 +312,50 @@
                         $("#addEditBandaForm").trigger("reset"); //LIMPIA EL FORMULARIO MODAL
                         $("#modal-bandas").modal('hide'); //OCULTA EL MODAL
                         //REDIRECCIONA A LA RUTA INDEX EN 2 SEGS.
-                        setTimeout(function() {
+                       /* setTimeout(function() {
                             $(location).attr('href', '{{ route('bandas.index') }}');
-                        }, 2000);
+                        }, 2000);*/
                     }
                 });
             }
 
-            function img_previa(){
+            function img_previa(img_path,img_file){
+                let img_selector = $("#muestra_img");
+                let ext = img_path.substring(img_path.lastIndexOf('.')+1).toLowerCase();
+
+                if(ext == 'jpeg' || ext == 'jpg' || ext == 'png'){
+                        if(typeof(FileReader) != 'undefined'){
+
+                            var reader = new FileReader();
+                            reader.onload = function(e){
+                                $('<img/>',{'src':e.target.result,'class':'img-fluid','style':'max-width:100px;margin-bottom:10px;'}).appendTo(img_selector);
+                            }
+                            img_selector.show();
+                            reader.readAsDataURL(img_file);
+                        }
+                    }
+                    else{
+                        $(img_selector).html('Este archivo no contiene el formato de imagen!');
+                    }
+
+
+
+
+            }
+
+            /*function img_previa(){
                 $('input[type="file"][name="logo"]').val('');
                 $('input[type="file"][name="logo"]').on('change', function(){
 
+
                     let img_path = $(this)[0].value;
+                    alert(img_path);
                     let img_selector = $("#muestra_img");
-                    img_selector.find('img').remove();
                     let ext = img_path.substring(img_path.lastIndexOf('.')+1).toLowerCase();
 
-                    $(img_selector).html('Este archivo no contiene el formato de imagen!');
                     if(ext == 'jpeg' || ext == 'jpg' || ext == 'png'){
                         if(typeof(FileReader) != 'undefined'){
-                            img_selector.empty();
+
                             var reader = new FileReader();
                             reader.onload = function(e){
                                 $('<img/>',{'src':e.target.result,'class':'img-fluid','style':'max-width:100px;margin-bottom:10px;'}).appendTo(img_selector);
@@ -301,9 +363,14 @@
                             img_selector.show();
                             reader.readAsDataURL($(this)[0].files[0]);
                         }
+                        alert(img_selector);
                     }
+                    else{
+                        $(img_selector).html('Este archivo no contiene el formato de imagen!');
+                    }
+
                 });
-            }
+            }*/
         });
     </script>
 @endsection

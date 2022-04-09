@@ -21,10 +21,10 @@
               <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="{{ route('generos.index')}} ">Generos</a>
               </li>
-              {{-- <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="{{ route('autores.index')}} "></a>
+             <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{{ route('bandas.index')}} ">Bandas</a>
               </li>
-              <li class="nav-item">
+             {{--   <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="{{ route('libros.index')}} "></a>
               </li> --}}
             </ul>
