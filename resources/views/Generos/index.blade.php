@@ -91,18 +91,18 @@
             $("#btn-guardar").on('click', function(e) {
                 e.preventDefault();
 
-                //SE DEFINEN LA VARIABLES DE LA RUTA STORE Y EL METODO
-                let url = "{{ route('generos.store') }}";
-                let metodo = "POST";
+                //SE DEFINEN LA VARIABLES DE LA RUTA STORE Y LA ACCION A ENVIAR POR AJAX
+                let url = "generos";
+                let accion="GUARDAR";
 
                 //SE VERIFICA SI EL VALOR DEL BOTON GUARDAR ES "EDITAR"
                 if ($(this).val() === "editaGenero") {
 
                     let id = $("#id").val();
-                    url = "{{ route('generos.update', '+id+') }}";//SE REASIGNA EL VALOR DE LA VARIABLE RUTA PARA EDITAR
-                    metodo = "PUT";//SE REASIGNA EL VALOR DE LA VARIABLE METODO A "PUT"
+                    url = "generos/"+id;//SE REASIGNA EL VALOR DE LA VARIABLE RUTA PARA EDITAR
+                    accion="EDITAR";//SE REASIGNA EL VALOR DE LA VARIABLE ACCION PARA DEFINIR METODO AJAX
                 }
-                GuardaEdita(url, metodo);//FUNCION RECIBE LA URL Y EL METODO PARA ENVIARDATOS POR AJAX
+                GuardaEdita(url, accion);//FUNCION RECIBE LA URL Y LA ACCION PARA ENVIARDATOS POR AJAX
             });
 
             $(".edit").on('click', function() {
@@ -136,7 +136,7 @@
             $(".delete").on('click', function() {
 
                 let id = $(this).data('id'); //OBTIENE EL ID DEL REGISTRO
-                let url ="{{ route('generos.destroy', '+id+') }}"; //OBTIENE LA RUTA PARA ACCEDER AL CONTROLADOR
+                let url= "generos/"+id; //OBTIENE LA RUTA PARA ACCEDER AL CONTROLADOR
 
 
                 Swal.fire({
@@ -171,8 +171,7 @@
                                     showConfirmButton: false
                                 })
                                 setTimeout(function() {
-                                    $(location).attr('href',
-                                        '{{ route('generos.index') }}');
+                                    $(location).attr('href','/generos');
                                 }, 2000);
 
                             }
@@ -181,7 +180,7 @@
                 })
             });
 
-            function GuardaEdita(uri, metodo) {
+            function GuardaEdita(uri, accion) {
 
                 //AGREGAR CABECERAS CON TOKEN CSRF EN LLAMADA AJAX
                 $.ajaxSetup({
@@ -189,7 +188,7 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     }
                 });
-
+                let metodo=(accion=="EDITAR")? 'PUT' : 'POST';
                 //RECIBER POR PARAMETRO EL METODO A UTILIZAR(POST/PUT) Y LA URL QUE INDICARA A QUE CONTROLADOR Y METODO DIRIGIRSE
                 $.ajax({
                     url: uri,
@@ -209,7 +208,7 @@
                         $("#modal-generos").modal('hide'); //OCULTA EL MODAL
                         //REDIRECCIONA A LA RUTA INDEX EN 2 SEGS.
                         setTimeout(function() {
-                            $(location).attr('href', '{{ route('generos.index') }}');
+                            $(location).attr('href', '/generos');
                         }, 2000);
                     }
                 });

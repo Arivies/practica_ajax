@@ -106,9 +106,8 @@ class BandaController extends Controller
      */
     public function update(Request $request, Bandas $banda)
     {
-        die($banda);
         $validador = Validator::make($request->all(), [
-            'nombre' => 'unique:bandas'
+            'nombre' => 'unique:bandas,nombre,'.$request->id.',id'
          ]);
 
          $mensajes = array(
@@ -123,30 +122,17 @@ class BandaController extends Controller
              );
         }
 
-         $resp=$request->all();
-
-         if(!empty($request->file('logo'))){
-            $path = 'bandas/';
-            $file = $request->file('logo');
-            $nombre="";
-            if(!is_null($file)){
-                $nombre = time().'_'.$file->getClientOriginalName();
-                $upload = $file->storeAs($path, $nombre, 'public');
-            }
-            $resp['logo']=$nombre;
-            Storage::delete('bandas/'.$request->logo_ant);
+        $nombre=$request->logo_ant;
+        if($request->hasFile('logo')){
+            $nombre = time().'_'.$request->file('logo')->getClientOriginalName();
+            $request->file('logo')->storeAs('bandas/', $nombre, 'public');
+            Storage::delete('public/bandas/'.$request->logo_ant);
         }
+        $resp = request()->except(['_token','_method','id','logo_ant']);
 
-        $data = $banda::where('id', $request->id)->first();
-        dd($request);
-        $resp = $request->except('_token', 'id');
-        $data->update($resp);
-
-         /*$data=$generos::where('id',$request->id)->first();
-         $data->genero=$request->genero;
-         $data->update();*/
-
-         return response()->json($mensajes);
+        $resp['logo']=$nombre;
+        $banda::where('id','=',$request->id)->update($resp);
+        return response()->json($mensajes);
     }
 
     /**
@@ -157,7 +143,9 @@ class BandaController extends Controller
      */
     public function destroy(Bandas $bandas,Request $request)
     {
-        $bandas::where('id', $request->id)->delete();
+        $bandaElimina=$bandas::where('id', $request->id)->first();
+        Storage::delete('public/bandas/'.$bandaElimina->logo);
+        $bandas::destroy($request->id);
 
         $mensajes = array(
             'estatus' => 'success',

@@ -137,24 +137,8 @@
                                 muestra_img.show();
                                 reader.readAsDataURL($(this)[0].files[0]);
                         });
-
-
-
-                       // $("#addEditBandaForm").trigger("reset"); //LIMPIA EL FORMULARIO MODAL
-                       // $("#tituloBandaModal").html("Editar Banda"); //ESCRIBE TITULO EN EL MODAL
-
-                      //  $("#id").val(data.id); //ASIGNA VALORES EN EL FORMULARIO
-                      //  $("#genero").val(data.genero); //ASIGNA VALORES EN EL FORMULARIO
-
-                      //  $("#btn-guardar").val('editaGenero'); //CAMBIA EL VALOR DEL BOTON EN EL FORMULARIO MODAL
-                     //   $("#btn-guardar").html('Editar'); //CAMBIA EL TEXTO DEL BOTON EN EL FORMULARIO MODAL
-
-                     //   $("#modal-generos").modal('show'); //MUESTRA EL MODAL
                     }
                 });
-
-
-
                 $("#modal-bandas").modal('show');
             });
 
@@ -163,18 +147,18 @@
             $("#btn-guardar").on('click', function(e) {
                 e.preventDefault();
 
-                //SE DEFINEN LA VARIABLES DE LA RUTA STORE Y EL METODO
-                let url = "{{ route('bandas.store') }}";
-                let metodo = "POST";
+                //SE DEFINEN LA VARIABLES DE LA RUTA STORE Y LA ACCION
+                let url = "bandas";//"{{ route('bandas.store') }}";
+                let accion="GUARDAR";
 
                 //SE VERIFICA SI EL VALOR DEL BOTON GUARDAR ES "EDITAR"
                 if ($(this).val() === "editaBanda") {
 
                     let id = $("#id").val();
-                    url = "{{ route('bandas.update', '+id+') }}";//SE REASIGNA EL VALOR DE LA VARIABLE RUTA PARA EDITAR
-                    metodo = "PUT";//SE REASIGNA EL VALOR DE LA VARIABLE METODO A "PUT"
+                    url = "bandas/"+id;//SE REASIGNA EL VALOR DE LA VARIABLE RUTA PARA EDITAR
+                    accion="EDITAR" //LA ACCION PARA DEFINIR QUE METODO AGREGARA AL FORMDATA
                 }
-                GuardaEdita(url, metodo);//FUNCION RECIBE LA URL Y EL METODO PARA ENVIARDATOS POR AJAX
+                GuardaEdita(url, accion);//FUNCION RECIBE LA URL Y LA ACCION, PARA AGREGAR AL FORMDATA
             });
 
             $(".edit").on('click', function() {
@@ -231,8 +215,7 @@
             $(".delete").on('click', function() {
 
                 let id = $(this).data('id'); //OBTIENE EL ID DEL REGISTRO
-                let url ="{{ route('bandas.destroy', '+id+') }}"; //OBTIENE LA RUTA PARA ACCEDER AL CONTROLADOR
-
+                let url= "bandas/"+id;//OBTIENE LA RUTA PARA ACCEDER AL CONTROLADOR
 
                 Swal.fire({
                     title: 'Deseas eliminar la Banda?',
@@ -266,8 +249,7 @@
                                     showConfirmButton: false
                                 })
                                 setTimeout(function() {
-                                    $(location).attr('href',
-                                        '{{ route('generos.index') }}');
+                                    $(location).attr('href','bandas');
                                 }, 2000);
 
                             }
@@ -276,7 +258,7 @@
                 })
             });
 
-            function GuardaEdita(uri, metodo) {
+            function GuardaEdita(uri,accion) {
 
                 //AGREGAR CABECERAS CON TOKEN CSRF EN LLAMADA AJAX
                 $.ajaxSetup({
@@ -291,14 +273,15 @@
                 forma.append('genero_id',$("#genero").val());
                 forma.append('logo',$("#logo")[0].files[0]);
                 forma.append('logo_ant',$("#logo_ant").val());
+                (accion=="EDITAR")? forma.append('_method', 'PUT') : forma.append('_method', 'POST');
 
                 //RECIBER POR PARAMETRO EL METODO A UTILIZAR(POST/PUT) Y LA URL QUE INDICARA A QUE CONTROLADOR Y METODO DIRIGIRSE
                 $.ajax({
                     url: uri,
-                    type: metodo,
+                    type: "POST",
                     processData: false,
                     contentType: false,
-                    data: forma,
+                    data:forma,
                     dataType: 'json',
                     success: function(data) {
                         //ALERTAS DE SWEETALER2
@@ -312,9 +295,9 @@
                         $("#addEditBandaForm").trigger("reset"); //LIMPIA EL FORMULARIO MODAL
                         $("#modal-bandas").modal('hide'); //OCULTA EL MODAL
                         //REDIRECCIONA A LA RUTA INDEX EN 2 SEGS.
-                       /* setTimeout(function() {
-                            $(location).attr('href', '{{ route('bandas.index') }}');
-                        }, 2000);*/
+                        setTimeout(function() {
+                            $(location).attr('href','/bandas');
+                        }, 2000);
                     }
                 });
             }
@@ -338,39 +321,7 @@
                         $(img_selector).html('Este archivo no contiene el formato de imagen!');
                     }
 
-
-
-
             }
-
-            /*function img_previa(){
-                $('input[type="file"][name="logo"]').val('');
-                $('input[type="file"][name="logo"]').on('change', function(){
-
-
-                    let img_path = $(this)[0].value;
-                    alert(img_path);
-                    let img_selector = $("#muestra_img");
-                    let ext = img_path.substring(img_path.lastIndexOf('.')+1).toLowerCase();
-
-                    if(ext == 'jpeg' || ext == 'jpg' || ext == 'png'){
-                        if(typeof(FileReader) != 'undefined'){
-
-                            var reader = new FileReader();
-                            reader.onload = function(e){
-                                $('<img/>',{'src':e.target.result,'class':'img-fluid','style':'max-width:100px;margin-bottom:10px;'}).appendTo(img_selector);
-                            }
-                            img_selector.show();
-                            reader.readAsDataURL($(this)[0].files[0]);
-                        }
-                        alert(img_selector);
-                    }
-                    else{
-                        $(img_selector).html('Este archivo no contiene el formato de imagen!');
-                    }
-
-                });
-            }*/
         });
     </script>
 @endsection
