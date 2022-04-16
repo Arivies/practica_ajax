@@ -14,10 +14,13 @@ use App\Http\Controllers\Bandas\BandaController;
 |
 */
 
+Route::group(['middleware' => ['cors']], function () {
+
 Route::get('/', function () {
     return view('layout');
 })->name('index');
 
-
 Route::resource('/generos',GeneroController::class)->names('generos');
 Route::resource('/bandas',BandaController::class)->names('bandas');
+
+});
