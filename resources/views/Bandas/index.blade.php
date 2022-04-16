@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-3 d-flex justify-content-center">
-    <div class="card mt-3 col-8">
+    <div class="card mt-3">
         <div class="card-header bg-secondary text-white">
             Bandas
         </div>
