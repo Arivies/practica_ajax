@@ -263,7 +263,8 @@
                 //AGREGAR CABECERAS CON TOKEN CSRF EN LLAMADA AJAX
                 $.ajaxSetup({
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Access-Control-Allow-Origin: *'
                     }
                 });
 
