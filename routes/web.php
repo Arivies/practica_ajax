@@ -16,7 +16,7 @@ use App\Http\Controllers\Bandas\BandaController;
 
 Route::get('/', function () {
     return view('layout');
-});
+})->name('index');
 
 
 Route::resource('/generos',GeneroController::class)->names('generos');
